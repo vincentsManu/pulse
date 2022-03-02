@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: APP_NAME-healthcheck
+  namespace: PROJECT_NAME
+  annotations:
+    cert-manager.io/cluster-issuer: "mkcert-cluster-issuer"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: APP_NAME-manu
+  namespace: PROJECT_NAME
+  annotations:
+    cert-manager.io/cluster-issuer: "mkcert-cluster-issuer"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: APP_NAME-pulse
+  namespace: PROJECT_NAME
+  annotations:
+    cert-manager.io/cluster-issuer: "mkcert-cluster-issuer"

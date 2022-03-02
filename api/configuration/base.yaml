@@ -1,0 +1,21 @@
+application:
+  port: 8000
+  host: 0.0.0.0
+  base_url: "http://localhost"
+database:
+  host: "127.0.0.1"
+  port: 5432
+  username: "pulstats_app"
+  password: "yourpass"
+  database_name: "manupulse"
+  require_ssl: false
+database_writable:
+  host: "127.0.0.1"
+  port: 5432
+  username: "manupulse_app"
+  password: "yourpass"
+  database_name: "manupulse"
+  require_ssl: false
+tracing:
+  collector_endpoint_host: "http://collector.linkerd-jaeger.svc.cluster.local"
+  collector_endpoint_port: 9411

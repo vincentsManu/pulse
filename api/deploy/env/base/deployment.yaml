@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: APP_NAME
+  labels:
+    app: APP_NAME
+  namespace: PROJECT_NAME
+  annotations:
+    linkerd.io/inject: enabled
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: APP_NAME
+  template:
+    metadata:
+      labels:
+        app: APP_NAME
+        namespace: PROJECT_NAME
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      initContainers:
+        - name: wait-for-APP_NAME-migration
+          image: groundnuty/k8s-wait-for:v1.5.1
+          args:
+            - "job"
+            - "APP_NAME-APP_VERSION-migration"
+            - "-n PROJECT_NAME"
+      containers:
+        - name: APP_NAME
+          image: CONTAINER_REGISTRY_URLAPP_NAME:APP_VERSION
+          ports:
+            - containerPort: 8000
+          env:
+            - name: APP_ENVIRONMENT
+              value: "VAR_APP_ENV"
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "2"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 10
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: job-reader
+  namespace: PROJECT_NAME
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: job-reader
+  namespace: PROJECT_NAME
+subjects:
+  - kind: ServiceAccount
+    name: default
+roleRef:
+  kind: Role
+  name: job-reader
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: APP_NAME
+  namespace: PROJECT_NAME
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/enable-opentracing: "true"
+    zipkin-collector-host: collector.linkerd-jaeger
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  tls:
+    - hosts:
+        - APP_DOMAIN
+      secretName: APP_TLS_SECRET
+  rules:
+    - host: "APP_DOMAIN"
+      http:
+        paths:
+          - path: /pulstats/ui(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: APP_NAME
+                port:
+                  number: 80
