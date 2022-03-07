@@ -1,6 +1,6 @@
 [package]
 name = "pulstats"
-version = "0.1.59"
+version = "0.1.60"
 authors = ["Vincent Serpoul <vincent_serpoul@manulife.com>"]
 description = "pulstats"
 readme = "README.md"
