@@ -1,16 +1,17 @@
-use super::{get::get_db, Stats};
+use super::{get::get_all_stats_per_kiosk_location, Stats};
 use log::{error, warn};
 use sqlx::PgPool;
+use std::collections::HashMap;
 use tokio::sync::{mpsc, oneshot, watch};
 
 pub async fn init(
     pool: &PgPool,
     pool_notify: &PgPool,
-) -> eyre::Result<(mpsc::Sender<StatsActorMessage>, watch::Receiver<Stats>)> {
+) -> eyre::Result<(mpsc::Sender<StatsActorMessage>, watch::Receiver<HashMap<String, Stats>>)> {
     let (tx, rx) = mpsc::channel::<StatsActorMessage>(10);
 
     // get stats
-    let stats = get_db(pool).await?;
+    let stats = get_all_stats_per_kiosk_location(pool).await?;
 
     // update the watcher when rx listen receive updates
     let (watch_sender, watch_receiver) = watch::channel(stats.clone());
@@ -28,21 +29,21 @@ pub async fn init(
 
 struct StatsActor {
     receiver: mpsc::Receiver<StatsActorMessage>,
-    stats: Stats,
-    watch_sender: watch::Sender<Stats>,
+    stats: HashMap<String, Stats>,
+    watch_sender: watch::Sender<HashMap<String, Stats>>,
 }
 
 #[derive(Debug)]
 pub enum StatsActorMessage {
-    GetStats { respond_to: oneshot::Sender<Stats> },
-    SetStats(Stats),
+    GetStats { respond_to: oneshot::Sender<HashMap<String, Stats>> },
+    SetStats(HashMap<String, Stats>),
 }
 
 impl StatsActor {
     async fn new(
-        stats: Stats,
+        stats: HashMap<String, Stats>,
         receiver: mpsc::Receiver<StatsActorMessage>,
-        watch_sender: watch::Sender<Stats>,
+        watch_sender: watch::Sender<HashMap<String, Stats>>,
     ) -> Self {
         Self { stats, receiver, watch_sender }
     }
@@ -102,7 +103,7 @@ async fn run_listen_stats_changes(
     let (tx_stats_throttler, mut rx_stats_throttler) = mpsc::channel::<()>(1);
     tokio::spawn(async move {
         while rx_stats_throttler.recv().await.is_some() {
-            match get_db(&pool_request).await {
+            match get_all_stats_per_kiosk_location(&pool_request).await {
                 Err(e) => error!("{:?}", e),
                 Ok(stats) => {
                     if let Err(e) = sender.send(StatsActorMessage::SetStats(stats)).await {
