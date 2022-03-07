@@ -142,58 +142,6 @@ async fn post_user_session_returns_a_400_when_data_is_missing() {
     let faulty_bodies = vec![
         (
             r#"{
-                "has_consented":true,
-                "has_accepted_terms_conditions": true,
-                "has_been_printed": false,
-                "has_been_emailed": false,
-                "locale": "zh_Hans_HK"
-            }"#,
-            "missing id",
-        ),
-        (
-            r#"{
-                "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae3",
-                "has_accepted_terms_conditions": true,
-                "has_been_printed": false,
-                "has_been_emailed": false,
-                "locale": "zh_Hans_HK"
-            }"#,
-            "missing consent",
-        ),
-        (
-            r#"{
-                "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae3",
-                "has_consented":true,
-                "has_been_printed": false,
-                "has_been_emailed": false,
-                "locale": "zh_Hans_HK"
-            }"#,
-            "missing t&c",
-        ),
-        (
-            r#"{
-              "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae3",
-              "has_accepted_terms_conditions": true,
-              "has_consented":true,
-              "has_been_printed": false,
-              "has_been_emailed": false,
-          }"#,
-            "missing locale",
-        ),
-        (
-            r#"{
-                "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae4",
-                "has_consented: true,
-                "has_accepted_terms_conditions": true,
-                "has_been_printed": false,
-                "has_been_emailed": false,
-                "locale": "zh_Hans_HK"
-            }"#,
-            "malformed json",
-        ),
-        ("", "missing body"),
-        (
-            r#"{
                 "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae5",
                 "has_consented":true,
                 "has_accepted_terms_conditions": true,
@@ -348,36 +296,6 @@ async fn post_user_session_returns_a_400_when_data_is_missing() {
         (
             r#"{
                 "id": "79a5016e-fb57-4cf1-93f2-6eb323e65ae6",
-                "has_consented": false,
-                "has_accepted_terms_conditions": true,
-                "has_been_printed": false,
-                "has_been_emailed": false,
-                "locale": "zh_Hans_HK",
-                "user_interactions": [
-                    {
-                      "screen_id": "1-howitworks",
-                      "started_at": "2021-10-21T17:28:26+00:00",
-                      "ended_at": "2021-10-21T17:28:26+00:00",
-                      "has_been_skipped": false,
-                    },
-                    {
-                      "screen_id": "2-termsandconditions",
-                      "started_at": "2021-10-22T17:28:26+00:00",
-                      "ended_at": "2021-10-22T17:29:26+00:00",
-                      "has_been_skipped": false,
-                      "retakes": [
-                        { "retaked_at": "2021-10-22T17:28:26+00:00" },
-                        { "retaked_at": "2021-10-22T17:28:27+00:00" },
-                        { "retaked_at": "2021-10-22T17:28:28+00:00" }
-                      ]
-                    }
-                  ]
-              }"#,
-            "not consented with user interaction data",
-        ),
-        (
-            r#"{
-                "id": "79a5016e-fb57-4cf1-93f2-6eb323e65ae6",
                 "has_consented": true,
                 "has_accepted_terms_conditions": false,
                 "has_been_printed": false,
@@ -405,6 +323,80 @@ async fn post_user_session_returns_a_400_when_data_is_missing() {
               }"#,
             "t&c not accepted with user interaction data",
         ),
+    ];
+
+    for (invalid_body, error_message) in faulty_bodies {
+        // Act
+        let response = app.post_user_session(invalid_body.into()).await;
+
+        // Assert
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            // Additional customised error message on test failure
+            "The API did not fail with 400 Bad Request when the payload was {}.",
+            error_message
+        );
+    }
+}
+
+#[tokio::test]
+async fn post_user_session_returns_a_422_when_data_is_unprocessable() {
+    // Arrange
+    let app = spawn_app().await;
+    let faulty_bodies = vec![
+        (
+            r#"{
+                "has_consented":true,
+                "has_accepted_terms_conditions": true,
+                "has_been_printed": false,
+                "has_been_emailed": false,
+                "locale": "zh_Hans_HK"
+            }"#,
+            "missing id",
+        ),
+        (
+            r#"{
+                "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae3",
+                "has_accepted_terms_conditions": true,
+                "has_been_printed": false,
+                "has_been_emailed": false,
+                "locale": "zh_Hans_HK"
+            }"#,
+            "missing consent",
+        ),
+        (
+            r#"{
+                "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae3",
+                "has_consented":true,
+                "has_been_printed": false,
+                "has_been_emailed": false,
+                "locale": "zh_Hans_HK"
+            }"#,
+            "missing t&c",
+        ),
+        (
+            r#"{
+              "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae3",
+              "has_accepted_terms_conditions": true,
+              "has_consented":true,
+              "has_been_printed": false,
+              "has_been_emailed": false,
+          }"#,
+            "missing locale",
+        ),
+        (
+            r#"{
+                "id":"79a5016e-fb57-4cf1-93f2-6eb323e65ae4",
+                "has_consented: true,
+                "has_accepted_terms_conditions": true,
+                "has_been_printed": false,
+                "has_been_emailed": false,
+                "locale": "zh_Hans_HK"
+            }"#,
+            "malformed json",
+        ),
+        ("", "missing body"),
         (
             r#"
             {
@@ -503,7 +495,7 @@ async fn post_user_session_returns_a_400_when_data_is_missing() {
 
         // Assert
         assert_eq!(
-            400,
+            422,
             response.status().as_u16(),
             // Additional customised error message on test failure
             "The API did not fail with 400 Bad Request when the payload was {}.",

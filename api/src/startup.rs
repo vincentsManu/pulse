@@ -5,8 +5,8 @@ use crate::routes::{
 };
 use crate::stats;
 use axum::{
-    error_handling::HandleErrorLayer, http::Method, http::StatusCode, routing::get, routing::post,
-    AddExtensionLayer, BoxError, Router,
+    error_handling::HandleErrorLayer, extract::Extension, http::Method, http::StatusCode,
+    routing::get, routing::post, BoxError, Router,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::{net::TcpListener, time::Duration};
@@ -50,11 +50,11 @@ pub async fn prepare(configuration: &Settings) -> eyre::Result<Router> {
                 .allow_origin(Origin::exact("http://localhost:8080".parse().unwrap()))
                 .allow_methods(vec![Method::GET]),
         )
-        .layer(AddExtensionLayer::new(tx_get_stats))
-        .layer(AddExtensionLayer::new(watch_stats))
-        .layer(AddExtensionLayer::new(base_url))
-        .layer(AddExtensionLayer::new(connection_pool))
-        .layer(AddExtensionLayer::new(connection_pool_writable));
+        .layer(Extension(tx_get_stats))
+        .layer(Extension(watch_stats))
+        .layer(Extension(base_url))
+        .layer(Extension(connection_pool))
+        .layer(Extension(connection_pool_writable));
 
     // build our application with a route
     let app = Router::new()
