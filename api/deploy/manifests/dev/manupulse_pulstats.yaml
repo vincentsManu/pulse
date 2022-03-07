@@ -76,7 +76,7 @@ spec:
       - env:
         - name: APP_ENVIRONMENT
           value: dev
-        image: registry4manupulse.azurecr.io/pulstats:v0.1.57
+        image: registry4manupulse.azurecr.io/pulstats:v0.1.60
         livenessProbe:
           httpGet:
             path: /healthz
@@ -96,7 +96,7 @@ spec:
       initContainers:
       - args:
         - job
-        - pulstats-v0.1.57-migration
+        - pulstats-v0.1.60-migration
         - -n manupulse
         image: groundnuty/k8s-wait-for:v1.5.1
         name: wait-for-pulstats-migration
@@ -106,7 +106,7 @@ kind: Job
 metadata:
   labels:
     app: pulstats
-  name: pulstats-v0.1.57-migration
+  name: pulstats-v0.1.60-migration
   namespace: manupulse
 spec:
   backoffLimit: 1
@@ -121,7 +121,7 @@ spec:
         env:
         - name: APP_ENVIRONMENT
           value: dev
-        image: registry4manupulse.azurecr.io/pulstats:v0.1.57
+        image: registry4manupulse.azurecr.io/pulstats:v0.1.60
         name: pulstats-migration
         resources:
           limits:
