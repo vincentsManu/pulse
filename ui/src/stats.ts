@@ -83,7 +83,7 @@ if (domain_url_switch === "relative") {
   base_url = "http://localhost:8000";
 }
 
-export async function getStats(): Promise<Stats> {
+export async function getStats(): Promise<Map<string, Stats>> {
   const res = await fetch(base_url + `pulstats/stats`);
   const stats = await res.json();
 
@@ -94,14 +94,16 @@ export async function getStats(): Promise<Stats> {
   }
 }
 
-import { readable } from "svelte/store";
+import { derived, readable } from "svelte/store";
 
-export const stats_store = readable(<Stats>{}, (set) => {
+export const stats_store = readable(<Map<string, Stats>>{}, (set) => {
+  set(new Map<string, Stats>());
+
   const eventSource = new EventSource(base_url + `/pulstats/stats/listen`);
 
   eventSource.onmessage = (e) => {
     try {
-      set(<Stats>JSON.parse(e.data));
+      set(<Map<string, Stats>>JSON.parse(e.data));
     } catch (e) {
       console.log(e.data); // error in the above string (in this case, yes)!
     }
@@ -110,6 +112,10 @@ export const stats_store = readable(<Stats>{}, (set) => {
   return function stop() {
     eventSource.close();
   };
+});
+
+export const kioskLocations = derived(stats_store, ($stats_store) => {
+  return [...$stats_store.keys()];
 });
 
 type BarChartItem = {

@@ -14,6 +14,8 @@
     users_per_weight_status_map,
   } from "./stats";
 
+  import { selectedKiosk } from "./kiosk.js";
+
   import {
     GaugeChart,
     BarChartSimple,
@@ -50,287 +52,314 @@
   }
 </script>
 
-<div class="wrapper">
-  {#if $stats_store.total_users !== undefined}
-    <div class="panel">
-      <p class="big-text">{$stats_store.total_users}</p>
-      <br />sessions
-    </div>
-    <div class="panel">
-      <p class="big-text">{convert2Hms($stats_store.median_duration_s)}</p>
-      <br />session time
-    </div>
-    <div class="panel">
-      <GaugeChart
-        data={[
-          {
-            group: "value",
-            value: $stats_store.completion_percent,
-          },
-        ]}
-        options={{
-          title: "% completion",
-          legend: {
-            enabled: false,
-          },
-          gauge: {
-            type: GaugeTypes.SEMI,
-          },
-        }}
-      />
-    </div>
-    <div class="panel">
-      <DonutChart
-        data={users_per_gender_map($stats_store.users_per_gender)}
-        options={{
-          title: "gender",
-          legend: {
-            position: LegendPositions.LEFT,
-          },
-          donut: {
-            center: {
-              label: "gender",
+{#if $stats_store.size > 0}
+  <div class="wrapper">
+    {#if $stats_store[selectedKiosk.toString()].total_users !== undefined}
+      <div class="panel">
+        <p class="big-text">
+          {$stats_store[selectedKiosk.toString()].total_users}
+        </p>
+        <br />sessions
+      </div>
+      <div class="panel">
+        <p class="big-text">
+          {convert2Hms(
+            $stats_store[selectedKiosk.toString()].median_duration_s
+          )}
+        </p>
+        <br />session time
+      </div>
+      <div class="panel">
+        <GaugeChart
+          data={[
+            {
+              group: "value",
+              value: $stats_store[selectedKiosk.toString()].completion_percent,
             },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={users_per_age_group_map($stats_store.users_per_age_group)}
-        options={{
-          title: "users per age group",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={users_per_weight_status_map($stats_store.users_per_weight_status)}
-        options={{
-          title: "bmi status",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <DonutChart
-        data={users_per_feedback_map($stats_store.users_per_feedback)}
-        options={{
-          title: "feedback",
-          legend: {
-            position: LegendPositions.LEFT,
-          },
-          donut: {
-            center: {
-              label: "feedbacks",
+          ]}
+          options={{
+            title: "% completion",
+            legend: {
+              enabled: false,
             },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <DonutChart
-        data={users_per_locale_map($stats_store.users_per_locale)}
-        options={{
-          title: "locale",
-          legend: {
-            position: LegendPositions.LEFT,
-          },
-          donut: {
-            center: {
-              label: "locales",
+            gauge: {
+              type: GaugeTypes.SEMI,
             },
-          },
-        }}
-      />
-    </div>
-    <div class="panel">
-      <GaugeChart
-        data={[
-          {
-            group: "value",
-            value: $stats_store.agreed_percent,
-          },
-        ]}
-        options={{
-          title: "% agreed to t&c",
-          legend: {
-            enabled: false,
-          },
-          gauge: {
-            type: GaugeTypes.SEMI,
-          },
-        }}
-      />
-    </div>
-    <div class="panel">
-      <GaugeChart
-        data={[
-          {
-            group: "value",
-            value: $stats_store.consented_percent,
-          },
-        ]}
-        options={{
-          title: "% consent",
-          legend: {
-            enabled: false,
-          },
-          gauge: {
-            type: GaugeTypes.SEMI,
-          },
-        }}
-      />
-    </div>
-    <div class="panel">
-      <GaugeChart
-        data={[
-          {
-            group: "value",
-            value: $stats_store.has_been_printed_percent,
-          },
-        ]}
-        options={{
-          title: "% printed",
-          legend: {
-            enabled: false,
-          },
-          gauge: {
-            type: GaugeTypes.SEMI,
-          },
-        }}
-      />
-    </div>
-    <div class="panel">
-      <GaugeChart
-        data={[
-          {
-            group: "value",
-            value: $stats_store.has_been_emailed_percent,
-          },
-        ]}
-        options={{
-          title: "% emailed",
-          legend: {
-            enabled: false,
-          },
-          gauge: {
-            type: GaugeTypes.SEMI,
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={users_per_hour_map($stats_store.users_per_hour)}
-        options={{
-          title: "users per hour",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={users_per_weekday_map($stats_store.users_per_weekday)}
-        options={{
-          title: "users per weekday",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel full-wide-panel">
-      <BarChartSimple
-        data={users_per_day_map($stats_store.users_per_day)}
-        options={{
-          title: "users per day",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={median_duration_s_per_screen_map(
-          $stats_store.median_duration_s_per_screen
-        )}
-        options={{
-          title: "median duration (s) per screen",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={median_retakes_per_screen_map(
-          $stats_store.median_retakes_per_screen
-        )}
-        options={{
-          title: "median retakes per screen",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-    <div class="panel half-wide-panel">
-      <BarChartSimple
-        data={has_been_skipped_percent_per_screen_map(
-          $stats_store.has_been_skipped_percent_per_screen
-        )}
-        options={{
-          title: "% of skips per screen",
-          legend: {
-            enabled: false,
-          },
-          axes: {
-            left: { mapsTo: "value" },
-            bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
-          },
-        }}
-      />
-    </div>
-  {/if}
-</div>
+          }}
+        />
+      </div>
+      <div class="panel">
+        <DonutChart
+          data={users_per_gender_map(
+            $stats_store[selectedKiosk.toString()].users_per_gender
+          )}
+          options={{
+            title: "gender",
+            legend: {
+              position: LegendPositions.LEFT,
+            },
+            donut: {
+              center: {
+                label: "gender",
+              },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={users_per_age_group_map(
+            $stats_store[selectedKiosk.toString()].users_per_age_group
+          )}
+          options={{
+            title: "users per age group",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={users_per_weight_status_map(
+            $stats_store[selectedKiosk.toString()].users_per_weight_status
+          )}
+          options={{
+            title: "bmi status",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <DonutChart
+          data={users_per_feedback_map(
+            $stats_store[selectedKiosk.toString()].users_per_feedback
+          )}
+          options={{
+            title: "feedback",
+            legend: {
+              position: LegendPositions.LEFT,
+            },
+            donut: {
+              center: {
+                label: "feedbacks",
+              },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <DonutChart
+          data={users_per_locale_map(
+            $stats_store[selectedKiosk.toString()].users_per_locale
+          )}
+          options={{
+            title: "locale",
+            legend: {
+              position: LegendPositions.LEFT,
+            },
+            donut: {
+              center: {
+                label: "locales",
+              },
+            },
+          }}
+        />
+      </div>
+      <div class="panel">
+        <GaugeChart
+          data={[
+            {
+              group: "value",
+              value: $stats_store[selectedKiosk.toString()].agreed_percent,
+            },
+          ]}
+          options={{
+            title: "% agreed to t&c",
+            legend: {
+              enabled: false,
+            },
+            gauge: {
+              type: GaugeTypes.SEMI,
+            },
+          }}
+        />
+      </div>
+      <div class="panel">
+        <GaugeChart
+          data={[
+            {
+              group: "value",
+              value: $stats_store[selectedKiosk.toString()].consented_percent,
+            },
+          ]}
+          options={{
+            title: "% consent",
+            legend: {
+              enabled: false,
+            },
+            gauge: {
+              type: GaugeTypes.SEMI,
+            },
+          }}
+        />
+      </div>
+      <div class="panel">
+        <GaugeChart
+          data={[
+            {
+              group: "value",
+              value:
+                $stats_store[selectedKiosk.toString()].has_been_printed_percent,
+            },
+          ]}
+          options={{
+            title: "% printed",
+            legend: {
+              enabled: false,
+            },
+            gauge: {
+              type: GaugeTypes.SEMI,
+            },
+          }}
+        />
+      </div>
+      <div class="panel">
+        <GaugeChart
+          data={[
+            {
+              group: "value",
+              value:
+                $stats_store[selectedKiosk.toString()].has_been_emailed_percent,
+            },
+          ]}
+          options={{
+            title: "% emailed",
+            legend: {
+              enabled: false,
+            },
+            gauge: {
+              type: GaugeTypes.SEMI,
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={users_per_hour_map(
+            $stats_store[selectedKiosk.toString()].users_per_hour
+          )}
+          options={{
+            title: "users per hour",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={users_per_weekday_map(
+            $stats_store[selectedKiosk.toString()].users_per_weekday
+          )}
+          options={{
+            title: "users per weekday",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel full-wide-panel">
+        <BarChartSimple
+          data={users_per_day_map(
+            $stats_store[selectedKiosk.toString()].users_per_day
+          )}
+          options={{
+            title: "users per day",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={median_duration_s_per_screen_map(
+            $stats_store[selectedKiosk.toString()].median_duration_s_per_screen
+          )}
+          options={{
+            title: "median duration (s) per screen",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={median_retakes_per_screen_map(
+            $stats_store[selectedKiosk.toString()].median_retakes_per_screen
+          )}
+          options={{
+            title: "median retakes per screen",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+      <div class="panel half-wide-panel">
+        <BarChartSimple
+          data={has_been_skipped_percent_per_screen_map(
+            $stats_store[selectedKiosk.toString()]
+              .has_been_skipped_percent_per_screen
+          )}
+          options={{
+            title: "% of skips per screen",
+            legend: {
+              enabled: false,
+            },
+            axes: {
+              left: { mapsTo: "value" },
+              bottom: { mapsTo: "group", scaleType: ScaleTypes.LABELS },
+            },
+          }}
+        />
+      </div>
+    {/if}
+  </div>
+{/if}
 
 <style>
   .wrapper {
