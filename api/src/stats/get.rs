@@ -269,11 +269,8 @@ pub async fn get_db(pool: &PgPool, filters: &GetFilters) -> eyre::Result<Stats> 
                         CURRENT_DATE, 
                         '1 day'
                     ) d
-                    LEFT JOIN user_session us
+                    LEFT JOIN (user_session us LEFT JOIN health_data hd ON hd.user_session_id = us.id AND hd.kiosk_location = ANY($1))
                         ON TO_CHAR(us.created_at AT TIME ZONE 'Asia/Singapore', 'YYYY-MM-DD') = TO_CHAR(d AT TIME ZONE 'Asia/Singapore', 'YYYY-MM-DD')
-                    LEFT JOIN health_data hd
-                        ON hd.user_session_id = us.id
-                        AND hd.kiosk_location = ANY($1)  
                     GROUP BY date
                     ORDER BY date
                 ) p
