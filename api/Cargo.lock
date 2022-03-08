@@ -1306,7 +1306,7 @@ dependencies = [
 
 [[package]]
 name = "pulstats"
-version = "0.1.61"
+version = "0.1.62"
 dependencies = [
  "axum",
  "chrono",
