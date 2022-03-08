@@ -37,7 +37,7 @@ spec:
       - env:
         - name: APP_ENVIRONMENT
           value: prod
-        image: registry4manupulse.azurecr.io/pulstats-ui:v0.1.50
+        image: registry4manupulse.azurecr.io/pulstats-ui:v0.1.60
         name: pulstats-ui
         ports:
         - containerPort: 80
