@@ -1,18 +1,9 @@
 <script lang="ts">
-  import { kioskLocations } from "./stats";
-  import { selectedKiosk } from "./kiosk.js";
-
-  let selected = "";
-  console.log(kioskLocations);
+  import { kioskLocations, selectedKiosk } from "./stats.js";
 </script>
 
 <div class="wrapper">
-  <select
-    value={selected}
-    on:change={(v) => {
-      selectedKiosk.update((v) => v);
-    }}
-  >
+  <select bind:value={$selectedKiosk}>
     {#each $kioskLocations as kioskLocation}
       <option value={kioskLocation}>
         {kioskLocation == "" ? "All kiosks" : kioskLocation}

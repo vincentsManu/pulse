@@ -1,4 +1,4 @@
-type Stats = {
+export type Stats = {
   total_users: number;
   median_duration_s: number;
   users_per_hour: UsersPerHour[];
@@ -101,11 +101,15 @@ export const stats_store = readable(<Map<string, Stats>>{}, (set) => {
 
   const eventSource = new EventSource(base_url + `/pulstats/stats/listen`);
 
-  eventSource.onmessage = (e) => {
+  eventSource.onmessage = (ev) => {
     try {
-      set(<Map<string, Stats>>JSON.parse(e.data));
+      console.log("Receive");
+      const all_kiosks_stats = new Map<string, Stats>(
+        Object.entries(JSON.parse(ev.data))
+      );
+      set(all_kiosks_stats);
     } catch (e) {
-      console.log(e.data); // error in the above string (in this case, yes)!
+      console.log("error eventsource", e);
     }
   };
 
@@ -115,8 +119,21 @@ export const stats_store = readable(<Map<string, Stats>>{}, (set) => {
 });
 
 export const kioskLocations = derived(stats_store, ($stats_store) => {
-  return [...$stats_store.keys()];
+  if ($stats_store instanceof Map) {
+    let kiosks = [];
+    $stats_store.forEach((_v, k) => {
+      kiosks.push(k);
+    });
+
+    return kiosks;
+  }
+
+  return [""];
 });
+
+import { writable } from "svelte/store";
+
+export const selectedKiosk = writable("");
 
 type BarChartItem = {
   group: string;
